@@ -1,0 +1,64 @@
+---
+title: "STAT433 - HW2"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(nycflights13)
+library(ggplot2)
+```
+
+1) How many flights have a missing dep_time? What other variables are missing? What might these rows represent?
+
+```{r}
+flights_cancled <- flights %>%
+  filter(is.na(dep_time))
+
+flights_cancled;nrow(flights_cancled)
+```
+
+The number of rows (flights) that are missing dep_time are 8,255. Since missing variables suchs as dep_time, dep_delay, and arr_time are about departure, we can assume that the rows represent the flights whose departure was cancled. 
+
+
+2) Currently dep_time and sched_dep_time are convenient to look at, but hard to compute with because theyâ€™re not really continuous numbers. Convert them to a more convenient representation of number of minutes since midnight.
+
+```{r}
+flights_tempt <- select(flights,
+                        dep_time,
+                        sched_dep_time)
+
+mutate(flights_tempt,
+       dep_time = ( 24 * 60 ) - ( (dep_time %/% 100) * 60 + (dep_time %% 100) ),
+       sched_dep_time = ( 24 * 60 ) - ( (sched_dep_time %/% 100) * 60 + (sched_dep_time %% 100) )
+)
+```
+
+```{r}
+# This is dummy code
+minute <- as.integer(flights[1,5]) %% 100
+hour <- as.integer(flights[1,5]) %/% 100
+
+time_remained <- (24*60) - ( (hour * 60) + minute);time_remained
+```
+
+3) Look at the number of cancelled flights per day. Is there a pattern? Is the proportion of cancelled flights related to the average delay? Use multiple dyplr operations, all on one line, concluding with `ggplot(aes(x= ,y=)) + geom_point()'
+  
+The number of cancelled flights per day:
+
+```{r}
+flights_cancled_tempt <- flights_cancled %>%
+  group_by(day) %>%
+  summarize(count = n())
+
+flights_cancled_tempt %>%
+  ggplot(mapping = aes(x = day , y= count)) + geom_point(aes(size = count))
+
+```
+It seems like the number of missing flights per day is at its peak at around 8. Therefore, we can assume that at 8th day of a month, the number of canceled flight is the highest.
+
+
+github link: https://github.com/rlawlstjr544/STAT433_HW2
+
+
